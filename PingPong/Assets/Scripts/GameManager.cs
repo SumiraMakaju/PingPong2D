@@ -1,6 +1,9 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class GameManager : MonoBehaviour
 {
@@ -119,9 +122,42 @@ public class GameManager : MonoBehaviour
 
         if (controlsHintText != null)
         {
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
+            if (Application.isMobilePlatform)
+            {
+                controlsHintText.text = isTwoPlayer
+                    ? "Top: Drag to Move | Bottom: Drag to Move"
+                    : "Bottom: Drag to Move";
+            }
+            else
+            {
+                controlsHintText.text = isTwoPlayer
+                    ? "Top: A/D | Bottom: Arrow Keys"
+                    : "Bottom: Arrow Keys";
+            }
+#else
             controlsHintText.text = isTwoPlayer
                 ? "Top: A/D | Bottom: Arrow Keys"
                 : "Bottom: Arrow Keys";
+#endif
         }
+    }
+
+    void Update()
+    {
+#if ENABLE_INPUT_SYSTEM
+        var kb = Keyboard.current;
+        if (kb != null && kb.escapeKey.wasPressedThisFrame)
+        {
+            Application.Quit();
+        }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+#endif
     }
 }
